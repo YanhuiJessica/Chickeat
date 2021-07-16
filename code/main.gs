@@ -1,11 +1,13 @@
 function doPost(e){
   var estringa = JSON.parse(e.postData.contents);
   var payload = identificar(estringa);
-  var data = {
-    "method": "post",
-    "payload": payload
+  if (payload) {
+    var data = {
+      "method": "post",
+      "payload": payload
+    }
+    UrlFetchApp.fetch("https://api.telegram.org/bot<bot-token>/", data);
   }
-  UrlFetchApp.fetch("https://api.telegram.org/bot<bot-token>/", data);
 }
 
 function identificar(e){
@@ -44,12 +46,17 @@ function identificar(e){
       "photo": text.file_id
     }
    }
-  else {
+  else if (e.message.new_chat_member){
     var mensaje = {
       "method": "sendMessage",
       "chat_id": e.message.chat.id.toString(),
-      "text": "要吃点什么呢？🐤"
+      "text": "欢迎 " + getMentionName(e.message.new_chat_member) + " 加入本群~！使用 /list 来看看有什么好吃的呀~🤗",
+      "parse_mode": "Markdown",
+      "disable_web_page_preview": true,
     }
-   }
+  }
+  else {
+    var mensaje = {}
+  }
   return mensaje
 }
