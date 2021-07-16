@@ -2,6 +2,15 @@ function randomInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function getUniqueRandoms(min, max, cnt) {
+  var res = [];
+  while(res.length < cnt) {
+    var random = randomInteger(min, max);
+    if (!res.includes(random)) res.push(random);
+  }
+  return res;
+}
+
 function GetMD5Hash(input) {
   var rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, input);
   var txtHash = '';
@@ -15,6 +24,19 @@ function GetMD5Hash(input) {
     txtHash += hashVal.toString(16);
   }
   return txtHash;
+}
+
+function getFolder(){
+  return DriveApp.getFolderById('1AVWGzwEFJTkup13-Dr9fBSdsgwdXH3q2');
+}
+
+function getFileList(folder) {
+  var files = folder.getFiles();
+  var filenames = [];
+  while (files.hasNext()) {
+    filenames.push(files.next().getName());
+  }
+  return filenames;
 }
 
 function getName(user) {
@@ -51,9 +73,16 @@ function getMentionName(user) {
   return mentionName;
 }
 
-function TextProcess(file, menu_string, text) {
+function splitFileContent(menu_string) {
   var menu = menu_string.split('\n'); menu.pop();
-  var len = menu.length;
+  var chat_id = menu.splice(0,1);
+  return [chat_id, menu, menu.length];
+}
+
+function TextProcess(file, menu_string, text) {
+  var contents = splitFileContent(menu_string);
+  var menu = contents[1];
+  var len = contents[2];
   var paras = text.trim().split(' ');
   var msg = "";
   if (text.indexOf('/random') === 0) {

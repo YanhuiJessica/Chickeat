@@ -1,6 +1,4 @@
-function doPost(e){
-  var estringa = JSON.parse(e.postData.contents);
-  var payload = identificar(estringa);
+function send(payload) {
   if (payload) {
     var data = {
       "method": "post",
@@ -10,24 +8,29 @@ function doPost(e){
   }
 }
 
+function doPost(e){
+  var estringa = JSON.parse(e.postData.contents);
+  var payload = identificar(estringa);
+  send(payload);
+}
+
 function identificar(e){
-  var folder = DriveApp.getFolderById('1AVWGzwEFJTkup13-Dr9fBSdsgwdXH3q2');
+  var folder = getFolder();
   var filename = GetMD5Hash(e.message.chat.id.toString());
   var file = folder.getFilesByName(filename);
-  var menu_string = "";
   if (!file.hasNext()) {
     file = folder.createFile(filename,"");
-    menu_string = file.getBlob().getDataAsString();
+    file.setContent(e.message.chat.id.toString() + '\n');
   }
   else {
     file = file.next();
-    menu_string = file.getBlob().getDataAsString();
   }
+  var filecontent = file.getBlob().getDataAsString();
   if (e.message.text){
     var mensaje = {
       "method": "sendMessage",
       "chat_id": e.message.chat.id.toString(),
-      "text": TextProcess(file, menu_string, e.message.text),
+      "text": TextProcess(file, filecontent, e.message.text),
     }
   }
   else if (e.message.sticker){
