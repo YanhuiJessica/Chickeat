@@ -4,9 +4,23 @@ function randomInteger(min, max) {
 
 function getUniqueRandoms(min, max, cnt) {
   var res = [];
-  while(res.length < cnt) {
-    var random = randomInteger(min, max);
-    if (!res.includes(random)) res.push(random);
+  if (max - min + 1 == cnt) {
+    res = Array.apply(null, Array(cnt)).map(function(_, i) {return i});
+  }
+  else if ((max - min + 1)/2 >= cnt) {
+    while(res.length < cnt) {
+      var random = randomInteger(min, max);
+      if (!res.includes(random)) res.push(random);
+    }
+  }
+  else {
+    var tmp = [];
+    while(tmp.length < max - min + 1 - cnt) {
+      var random = randomInteger(min, max);
+      if (!tmp.includes(random)) tmp.push(random);
+    }
+    for (var i = 0; i <= max; i++)
+      if (!tmp.includes(i)) res.push(i);
   }
   return res;
 }
