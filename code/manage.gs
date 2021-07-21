@@ -100,7 +100,27 @@ function TextProcess(file, menu_string, text) {
   var paras = text.trim().split(' ');
   var msg = "";
   if (text.indexOf('/random') === 0) {
-    msg = "尝尝 " + menu[randomInteger(0, len - 1)] + " 怎么样？";
+    if (paras[1])
+    {
+      if (paras[1] == 1)
+        msg = "尝尝 " + menu[randomInteger(0, len - 1)] + " 怎么样？";
+      else if (paras[1] <= len && paras[1] <= 15) {
+        var chosen = getUniqueRandoms(0, len - 1, paras[1]);
+        var msg = "看看这些怎么样🐥：\n";
+        for (var j = 0; j < chosen.length; j++) msg += menu[chosen[j]] + '\n';
+      }
+      else if (paras[1] <= len) {
+        var chosen = getUniqueRandoms(0, len - 1, 15);
+        var msg = "看看这些怎么样🐥：\n";
+        for (var j = 0; j < chosen.length; j++) msg += menu[chosen[j]] + '\n';
+        msg += "......\n你真的吃得完这么多么？👀"
+      }
+      else {
+        msg = "想什么啦！😡菜单里根本没那么多菜！"
+      }
+    }
+    else
+      msg = "尝尝 " + menu[randomInteger(0, len - 1)] + " 怎么样？\n\n还可以一次随机多个菜品嗷 => /random[@random_eat_bot] [number=1]";
   }
   else if (text.indexOf('/list') === 0) {     
     if (len == 0) {
