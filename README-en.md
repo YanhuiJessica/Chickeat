@@ -1,6 +1,6 @@
 # Chickeat
 
-[中文](README-zh.md) | En
+[中文](README.md) | En
 
 Telegram bot Chickeat [@random_eat_bot](https://t.me/random_eat_bot)
 

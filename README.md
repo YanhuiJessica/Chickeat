@@ -1,6 +1,6 @@
 # Chickeat
 
-中文 | [En](README.md)
+中文 | [En](README-en.md)
 
 电报机器人 Chickeat [@random_eat_bot](https://t.me/random_eat_bot)
 
