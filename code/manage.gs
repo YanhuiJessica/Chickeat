@@ -5,7 +5,7 @@ function randomInteger(min, max) {
 function getUniqueRandoms(min, max, cnt) {
   var res = [];
   if (max - min + 1 == cnt) {
-    res = Array.apply(null, Array(cnt)).map(function(_, i) {return i});
+    for (var i = min; i <= max; i++) res.push(i);
   }
   else if ((max - min + 1)/2 >= cnt) {
     while(res.length < cnt) {
@@ -19,7 +19,7 @@ function getUniqueRandoms(min, max, cnt) {
       var random = randomInteger(min, max);
       if (!tmp.includes(random)) tmp.push(random);
     }
-    for (var i = 0; i <= max; i++)
+    for (var i = min; i <= max; i++)
       if (!tmp.includes(i)) res.push(i);
   }
   return res;
@@ -46,11 +46,11 @@ function getFolder(){
 
 function getFileList(folder) {
   var files = folder.getFiles();
-  var filenames = [];
+  var fileids = [];
   while (files.hasNext()) {
-    filenames.push(files.next().getName());
+    fileids.push(files.next().getId());
   }
-  return filenames;
+  return fileids;
 }
 
 function getName(user) {
@@ -93,59 +93,76 @@ function splitFileContent(menu_string) {
   return [chat_id, menu, menu.length];
 }
 
-function TextProcess(file, menu_string, text) {
-  var contents = splitFileContent(menu_string);
-  var menu = contents[1];
-  var len = contents[2];
+function TextProcess(file, text) {
+  var menu_sheet = file.getSheetByName('menu');
+  var len = menu_sheet.getLastRow();
   var paras = text.trim().split(' ');
   var msg = "";
   if (text.indexOf('/random') === 0) {
     if (paras[1])
     {
-      if (paras[1] == 1)
-        msg = "尝尝 " + menu[randomInteger(0, len - 1)] + " 怎么样？";
-      else if (paras[1] <= len && paras[1] <= 15) {
-        var chosen = getUniqueRandoms(0, len - 1, paras[1]);
-        var msg = "看看这些怎么样🐥：\n";
-        for (var j = 0; j < chosen.length; j++) msg += menu[chosen[j]] + '\n';
-      }
-      else if (paras[1] <= len) {
-        var chosen = getUniqueRandoms(0, len - 1, 15);
-        var msg = "看看这些怎么样🐥：\n";
-        for (var j = 0; j < chosen.length; j++) msg += menu[chosen[j]] + '\n';
-        msg += "......\n你真的吃得完这么多么？👀"
-      }
-      else {
+      if (paras[1] > len) {
         msg = "想什么啦！😡菜单里根本没那么多菜！"
       }
+      else if (paras[1] == 1)
+      {
+        var random = randomInteger(1, len);
+        msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？";
+      }
+      else if (paras[1] <= 15) {
+        var chosen = getUniqueRandoms(1, len, paras[1]);
+        var msg = "看看这些怎么样🐥：\n";
+        for (var j = 0; j < chosen.length; j++) chosen[j] = 'A' + chosen[j];
+        var ranges = menu_sheet.getRangeList(chosen).getRanges();
+        for (var j = 0; j < chosen.length; j++) msg += ranges[j].getValue() + '\n';
+      }
+      else {
+        var chosen = getUniqueRandoms(1, len, 15);
+        var msg = "看看这些怎么样🐥：\n";
+        for (var j = 0; j < chosen.length; j++) chosen[j] = 'A' + chosen[j];
+        var ranges = menu_sheet.getRangeList(chosen).getRanges();
+        for (var j = 0; j < chosen.length; j++) msg += ranges[j].getValue() + '\n';
+        msg += "......\n你真的吃得完这么多么？👀"
+      }
     }
-    else
-      msg = "尝尝 " + menu[randomInteger(0, len - 1)] + " 怎么样？\n\n还可以一次随机多个菜品嗷 => /random[@random_eat_bot] [number=1]";
+    else{
+      if (len == 0) {
+        msg = "什么都没有怎么随机啦！>_<";
+      }
+      else
+      {
+        var random = randomInteger(1, len);
+        msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次随机多个菜品嗷 => /random[@random_eat_bot] [number=1]";
+      }
+    }
   }
   else if (text.indexOf('/list') === 0) {     
     if (len == 0) {
       msg = "现在没有什么想法诶…(ŏωŏ)";
     }
     else if (len == 1) {
-      msg = "只能吃" + menu[0] + "了 (╥ω╥)";
+      msg = "只能吃" + menu_sheet.getRange('A1').getValue() + "了 (╥ω╥)";
     }
     else if (len <= 5) {
-      msg = "当前菜单较为简陋，只剩下" + menu[0];
+      var menu = menu_sheet.getRange(1, 1, len).getValues();
+      msg = "当前菜单较为简陋，只剩下" + menu[0][0];
       for (var i = 1; i < len - 1; i++) {
-        msg += "、" + menu[i];
+        msg += "、" + menu[i][0];
       }
-      msg += "和" + menu[len - 1] + "了 :(";
+      msg += "和" + menu[len - 1][0] + "了 :(";
     }
     else if (len <= 10) {
-      msg = "这就是全部的菜了(ΦˋωˊΦ)：\n" + menu[0];
+      var menu = menu_sheet.getRange(1, 1, len).getValues();
+      msg = "这就是全部的菜了(ΦˋωˊΦ)：\n" + menu[0][0];
       for (var i = 1; i < len; i++) {
-        msg += '\n' + menu[i];
+        msg += '\n' + menu[i][0];
       }
     }
     else {
+      var menu = menu_sheet.getRange(1, 1, len).getValues();
       msg = "还有好多吃的呢~！\\(ΦωΦ ≡ ΦωΦ)/ 你看你看：\n";
       for (var i = 0; i < 10; i++) {
-        msg += menu[i] + '\n';
+        msg += menu[i][0] + '\n';
       }
       msg += '...';
     }
@@ -155,16 +172,15 @@ function TextProcess(file, menu_string, text) {
     {
       var cnt = 0;
       for (var i = 1; i < paras.length; i++) {
-        if (menu.indexOf(paras[i]) != -1) {
+        if (menu_sheet.createTextFinder(paras[i]).findNext()) {
           msg += paras[i] + " 已经在菜单中啦~🐣\n"
         }
         else {
-          menu_string += paras[i] + '\n';
+          menu_sheet.appendRow([paras[i]]);
           cnt += 1;
         }
       }
       if (cnt > 0) {
-        file.setContent(menu_string);
         msg += "添加成功！菜单已更新咕！🥳";
       }
     }
@@ -177,17 +193,16 @@ function TextProcess(file, menu_string, text) {
     {
       var cnt = 0;
       for (var i = 1; i < paras.length; i++) {
-        if (menu.indexOf(paras[i]) == -1) {
-          msg += paras[i] + " 不在菜单中哦~🤪\n"
+        var cell = menu_sheet.createTextFinder(paras[i]).findNext();
+        if (cell) {
+          menu_sheet.deleteRow(cell.getRow());
+          cnt += 1;
         }
         else {
-          menu.splice(menu.indexOf(paras[i]), 1);
-          cnt += 1;
+          msg += paras[i] + " 不在菜单中哦~🤪\n"
         }
       }
       if (cnt > 0) {
-        menu_string = menu.join('\n') + '\n';
-        file.setContent(menu_string);
         msg += "删除成功！不能吃的东西减少了~🥳";
       }
     }

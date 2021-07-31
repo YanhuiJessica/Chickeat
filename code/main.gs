@@ -4,7 +4,8 @@ function send(payload) {
       "method": "post",
       "payload": payload
     }
-    UrlFetchApp.fetch("https://api.telegram.org/bot<bot-token>/", data);
+    response = UrlFetchApp.fetch("https://api.telegram.org/bot<bot-token>/", data);
+    Logger.log(response.getContentText());
   }
 }
 
@@ -19,18 +20,22 @@ function identificar(e){
   var filename = GetMD5Hash(e.message.chat.id.toString());
   var file = folder.getFilesByName(filename);
   if (!file.hasNext()) {
-    file = folder.createFile(filename,"");
-    file.setContent(e.message.chat.id.toString() + '\n');
+    var file_id = SpreadsheetApp.create(filename).getId();
+    DriveApp.getFileById(file_id).moveTo(folder);
+    file = SpreadsheetApp.openById(file_id);
+    var settings = file.getSheets()[0];
+    settings.setName('settings');
+    settings.appendRow([e.message.chat.id.toString()]);
+    file.insertSheet('menu');
   }
   else {
-    file = file.next();
+    file = SpreadsheetApp.openById(file.next().getId());
   }
-  var filecontent = file.getBlob().getDataAsString();
   if (e.message.text){
     var mensaje = {
       "method": "sendMessage",
       "chat_id": e.message.chat.id.toString(),
-      "text": TextProcess(file, filecontent, e.message.text),
+      "text": TextProcess(file, e.message.text),
     }
   }
   else if (e.message.sticker){
@@ -59,7 +64,7 @@ function identificar(e){
     }
   }
   else {
-    var mensaje = {}
+    var mensaje = null;
   }
   return mensaje
 }
