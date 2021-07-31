@@ -4,7 +4,7 @@ function breakfast() {
   for (var i = 0; i < fl.length; i++)
   {
     var file = SpreadsheetApp.openById(fl[i]);
-    var chat_id = file.getSheetByName('settings').getRange(1, 1).getValue();
+    var chat_id = file.getSheetByName('settings').getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
     var cnt = 3;
@@ -29,7 +29,7 @@ function lunch() {
   for (var i = 0; i < fl.length; i++)
   {
     var file = SpreadsheetApp.openById(fl[i]);
-    var chat_id = file.getSheetByName('settings').getRange(1, 1).getValue();
+    var chat_id = file.getSheetByName('settings').getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
     var cnt = 3;
@@ -54,7 +54,7 @@ function dinner() {
   for (var i = 0; i < fl.length; i++)
   {
     var file = SpreadsheetApp.openById(fl[i]);
-    var chat_id = file.getSheetByName('settings').getRange(1, 1).getValue();
+    var chat_id = file.getSheetByName('settings').getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
     var cnt = 3;
