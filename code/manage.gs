@@ -93,8 +93,29 @@ function splitFileContent(menu_string) {
   return [chat_id, menu, menu.length];
 }
 
-function TextProcess(file, text) {
+function CallbackProcess(file, data, mensaje) {
+  var settings = file.getSheetByName('settings');
+  if (data.indexOf("daliy") === 0) {
+    var cell = settings.getRange('A2');
+    if (cell.getValue() == 1) {
+      cell.setValue(0);
+      mensaje.text = "每日推荐已关闭🥚";
+    }
+    else {
+      cell.setValue(1);
+      mensaje.text = "每日推荐开启成功🐣";
+    }
+    mensaje.reply_markup = JSON.stringify({"inline_keyboard": [[{text: "<< 返回设置", callback_data: "/settings"}]]});
+  }
+  else if (data.indexOf("/settings") === 0) {
+    mensaje = TextProcess(file, data, mensaje);
+  }
+  return mensaje;
+}
+
+function TextProcess(file, text, mensaje) {
   var menu_sheet = file.getSheetByName('menu');
+  var settings = file.getSheetByName('settings');
   var len = menu_sheet.getLastRow();
   var paras = text.trim().split(' ');
   var msg = "";
@@ -210,9 +231,27 @@ function TextProcess(file, text) {
       msg = "什么都没删掉( ´ΦДΦ｀)！\n\n我能看懂的删除方法 ΦωΦ：/delete[@random_eat_bot] <uneatable1> [<uneatable2>...]";
     }
   }
+  else if (text.indexOf('/settings') === 0) {
+    var daliy = settings.getRange('A2').getValue();
+    var key = "";
+    if (daliy == 1) key = "关闭";
+    else key = "开启";
+    var inlineKeyboardMarkup = {
+      "inline_keyboard": [
+        [
+          {
+            text: key + "每日推荐",
+            callback_data: "daliy"
+          }
+        ]
+      ]
+    };
+    msg = "设置本群的 Chickeat 🐣";
+    mensaje.reply_markup = JSON.stringify(inlineKeyboardMarkup);
+  }
   else{
       msg = text;
   }
-
-  return msg;
+  mensaje.text = msg;
+  return mensaje;
 }

@@ -20,8 +20,10 @@ function identificar(e){
   var folder = getFolder();
   if (e.message)
     var chat_id = e.message.chat.id.toString();
-  else
+  else if (e.edited_message)
     var chat_id = e.edited_message.chat.id.toString();
+  else
+    var chat_id = e.callback_query.message.chat.id.toString();
   var filename = GetMD5Hash(chat_id);
   var file = folder.getFilesByName(filename);
   if (!file.hasNext()) {
@@ -40,9 +42,9 @@ function identificar(e){
     if (e.message.text){
       var mensaje = {
         "method": "sendMessage",
-        "chat_id": chat_id,
-        "text": TextProcess(file, e.message.text),
+        "chat_id": chat_id
       }
+      mensaje = TextProcess(file, e.message.text, mensaje);
     }
     else if (e.message.sticker){
       var mensaje = {
@@ -70,13 +72,21 @@ function identificar(e){
       }
     }
   }
-  else if (e.edited_message.text){
+  else if (e.edited_message){
     var mensaje = {
       "method": "editMessageText",
       "chat_id": chat_id,
-      "message_id": (e.edited_message.message_id + 1).toString(),
-      "text": TextProcess(file, e.edited_message.text),
+      "message_id": (e.edited_message.message_id + 1).toString()
     }
-  } 
+    mensaje = TextProcess(file, e.edited_message.text, mensaje);
+  }
+  else if (e.callback_query) {
+    var mensaje = {
+      "method": "editMessageText",
+      "chat_id": chat_id,
+      "message_id": e.callback_query.message.message_id.toString()
+    }
+    mensaje = CallbackProcess(file, e.callback_query.data, mensaje);
+  }
   return mensaje
 }
