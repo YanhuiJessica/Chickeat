@@ -16,6 +16,7 @@ Supported commands:
 - [/delete](#) `<uneatable1> [<uneatable2>...]` - delete item(s) from the menu
 - [/list](#) - list current menu
 - [/random](#) `[integer=1]` - random dish(es) from the menu
+- [/settings](#) - customize your bot
 
 ## Reference
 
