@@ -63,10 +63,12 @@ function identificar(e){
       }
     }
     else if (e.message.new_chat_member){
+      if (settings.getRange(lang_pos).getValue() == 'Zh') var msg = "欢迎 " + getMentionName(e.message.new_chat_member) + " 加入本群~！使用 /list 来看看有什么好吃的呀~🤗";
+      else var msg = "Hi " + getMentionName(e.message.new_chat_member) + "! Welcome to our group! Use /list to take a look at the menu~🤗";
       var mensaje = {
         "method": "sendMessage",
         "chat_id": chat_id,
-        "text": "欢迎 " + getMentionName(e.message.new_chat_member) + " 加入本群~！使用 /list 来看看有什么好吃的呀~🤗",
+        "text": msg,
         "parse_mode": "Markdown",
         "disable_web_page_preview": true,
       }

@@ -80,7 +80,7 @@ function getMentionName(user) {
  
   var name = getName(user);
   if (!name) {
-    name = "叫不出名字的咕咕鸡";
+    name = "***";
   }
   mentionName = getMarkDownUserUrl(escapeMarkDown(name), user.id);
 
@@ -93,19 +93,69 @@ function splitFileContent(menu_string) {
   return [chat_id, menu, menu.length];
 }
 
+function getInlineKeyboardMarkup(settings) {
+  var daliy = settings.getRange(daliy_pos).getValue();
+  var lang = settings.getRange(lang_pos).getValue();
+  if (lang == 'Zh') var key = "关闭每日推荐";
+  else var key = 'Close everyday recommendation'
+  if (daliy.toString() == '0') {
+    if (lang == 'Zh') key = "开启每日推荐";
+    else key = 'Open everyday recommendation';
+  }
+  if (lang == 'Zh') lang = 'En';
+  else lang = 'Zh';
+  return {
+    "inline_keyboard": [
+      [
+        {
+          text: key,
+          callback_data: "daliy"
+        }      
+      ],
+      [
+        {
+          text: lang,
+          callback_data: "language"
+        }
+      ]
+    ]
+  };
+}
+
 function CallbackProcess(file, data, mensaje) {
   var settings = file.getSheetByName('settings');
   if (data.indexOf("daliy") === 0) {
-    var cell = settings.getRange('A2');
-    if (cell.getValue() == 1) {
+    var cell = settings.getRange(daliy_pos);
+    var stext = "<< 返回设置";
+    if (cell.getValue().toString() != '0') {
       cell.setValue(0);
-      mensaje.text = "每日推荐已关闭🥚";
+      if (settings.getRange(lang_pos).getValue() == 'Zh') mensaje.text = "每日推荐已关闭🥚";
+      else {
+        mensaje.text = "Everyday recommendation is closed🥚";
+        stext = "<< Back to settings";
+      }
     }
     else {
       cell.setValue(1);
-      mensaje.text = "每日推荐开启成功🐣";
+      if (settings.getRange(lang_pos).getValue() == 'Zh') mensaje.text = "每日推荐开启成功🐣";
+      else {
+        mensaje.text = "Everyday recommendation is opened🐣";
+        stext = "<< Back to settings";
+      }
     }
-    mensaje.reply_markup = JSON.stringify({"inline_keyboard": [[{text: "<< 返回设置", callback_data: "/settings"}]]});
+    mensaje.reply_markup = JSON.stringify({"inline_keyboard": [[{text: stext, callback_data: "/settings"}]]});
+  }
+  else if (data.indexOf("language") === 0) {
+    var cell = settings.getRange(lang_pos);
+    if (cell.getValue() == 'Zh') {
+      cell.setValue('En');
+      mensaje.text = "Customize Chickeat in this chat 🐣";
+    }
+    else {
+      cell.setValue('Zh');
+      mensaje.text = "设置当前会话的 Chickeat 🐣";
+    }
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings));
   }
   else if (data.indexOf("/settings") === 0) {
     mensaje = TextProcess(file, data, mensaje);
@@ -116,6 +166,7 @@ function CallbackProcess(file, data, mensaje) {
 function TextProcess(file, text, mensaje) {
   var menu_sheet = file.getSheetByName('menu');
   var settings = file.getSheetByName('settings');
+  var lang = settings.getRange(lang_pos).getValue();
   var len = menu_sheet.getLastRow();
   var paras = text.trim().split(' ');
   var msg = "";
@@ -123,65 +174,79 @@ function TextProcess(file, text, mensaje) {
     if (paras[1])
     {
       if (paras[1] > len) {
-        msg = "想什么啦！😡菜单里根本没那么多菜！"
+        if (lang == 'Zh') msg = "想什么啦！😡菜单里根本没那么多菜！"
+        else msg = "There aren't so many dishes on the menu! :(";
       }
       else if (paras[1] == 1)
       {
         var random = randomInteger(1, len);
-        msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？";
+        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？";
+        else msg = "How about " + menu_sheet.getRange(random, 1).getValue() + " ?";
       }
       else if (paras[1] <= 15) {
         var chosen = getUniqueRandoms(1, len, paras[1]);
-        var msg = "看看这些怎么样🐥：\n";
+        if (lang == 'Zh') var msg = "看看这些怎么样🐥：\n";
+        else var msg = "How about these🐥: \n";
         for (var j = 0; j < chosen.length; j++) chosen[j] = 'A' + chosen[j];
         var ranges = menu_sheet.getRangeList(chosen).getRanges();
         for (var j = 0; j < chosen.length; j++) msg += ranges[j].getValue() + '\n';
       }
       else {
         var chosen = getUniqueRandoms(1, len, 15);
-        var msg = "看看这些怎么样🐥：\n";
+        if (lang == 'Zh') var msg = "看看这些怎么样🐥：\n";
+        else var msg = "How about these🐥: \n";
         for (var j = 0; j < chosen.length; j++) chosen[j] = 'A' + chosen[j];
         var ranges = menu_sheet.getRangeList(chosen).getRanges();
         for (var j = 0; j < chosen.length; j++) msg += ranges[j].getValue() + '\n';
-        msg += "......\n你真的吃得完这么多么？👀"
+        if (lang == 'Zh') msg += "......\n你真的吃得完这么多么？👀"
+        else msg += "......\nI don't believe you can eat all of these.👀"
       }
     }
     else{
       if (len == 0) {
-        msg = "什么都没有怎么随机啦！>_<";
+        if (lang == 'Zh') msg = "什么都没有怎么随机啦！>_<";
+        else msg = "There is nothing on the menu. >_<"
       }
       else
       {
         var random = randomInteger(1, len);
-        msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次随机多个菜品嗷 => /random[@random_eat_bot] [number=1]";
+        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次随机多个菜品嗷 => /random[@random_eat_bot] [number=1]";
+        else msg = "How about " + menu_sheet.getRange(random, 1).getValue() + " ?\n\nYou can also random two or more dishes at one time => /random[@random_eat_bot] [number=1]";
       }
     }
   }
   else if (text.indexOf('/list') === 0) {     
     if (len == 0) {
-      msg = "现在没有什么想法诶…(ŏωŏ)";
+      if (lang == 'Zh') msg = "现在没有什么想法诶…(ŏωŏ)";
+      else msg = "There is nothing on the menu :("
     }
     else if (len == 1) {
-      msg = "只能吃" + menu_sheet.getRange('A1').getValue() + "了 (╥ω╥)";
+      if (lang == 'Zh') msg = "只能吃" + menu_sheet.getRange('A1').getValue() + "了 (╥ω╥)";
+      else msg = "You can only eat " + menu_sheet.getRange('A1').getValue() + " (╥ω╥)";
     }
     else if (len <= 5) {
       var menu = menu_sheet.getRange(1, 1, len).getValues();
-      msg = "当前菜单较为简陋，只剩下" + menu[0][0];
+      if (lang == 'Zh') msg = "当前菜单较为简陋，只剩下" + menu[0][0];
+      else msg = "There aren't so many dishes. Only " + menu[0][0];
       for (var i = 1; i < len - 1; i++) {
-        msg += "、" + menu[i][0];
+        if (lang == 'Zh') msg += "、" + menu[i][0];
+        else msg += ", " + menu[i][0];
       }
-      msg += "和" + menu[len - 1][0] + "了 :(";
+      if (lang == 'Zh') msg += "和" + menu[len - 1][0] + "了 :(";
+      else msg += "and " + menu[len - 1][0] + " :(";
     }
     else if (len <= 10) {
       var menu = menu_sheet.getRange(1, 1, len).getValues();
-      msg = "这就是全部的菜了(ΦˋωˊΦ)：\n" + menu[0][0];
+      if (lang == 'Zh') msg = "这就是全部的菜了(ΦˋωˊΦ)：\n" + menu[0][0];
+      else msg = "This is all(ΦˋωˊΦ):\n" + menu[0][0];
       for (var i = 1; i < len; i++) {
         msg += '\n' + menu[i][0];
       }
     }
     else {
       var menu = menu_sheet.getRange(1, 1, len).getValues();
-      msg = "还有好多吃的呢~！\\(ΦωΦ ≡ ΦωΦ)/ 你看你看：\n";
+      if (lang == 'Zh') msg = "还有好多吃的呢~！\\(ΦωΦ ≡ ΦωΦ)/ 你看你看：\n";
+      else msg = "There are so many dishes!\\(ΦωΦ ≡ ΦωΦ)/ Have a look:\n";
       for (var i = 0; i < 10; i++) {
         msg += menu[i][0] + '\n';
       }
@@ -194,7 +259,8 @@ function TextProcess(file, text, mensaje) {
       var cnt = 0;
       for (var i = 1; i < paras.length; i++) {
         if (menu_sheet.createTextFinder(paras[i]).findNext()) {
-          msg += paras[i] + " 已经在菜单中啦~🐣\n"
+          if (lang == 'Zh') msg += paras[i] + " 已经在菜单中啦~🐣\n"
+          else msg += paras[i] + " is already on the menu~🐣\n"
         }
         else {
           menu_sheet.appendRow([paras[i]]);
@@ -202,11 +268,13 @@ function TextProcess(file, text, mensaje) {
         }
       }
       if (cnt > 0) {
-        msg += "添加成功！菜单已更新咕！🥳";
+        if (lang == 'Zh') msg += "添加成功！菜单已更新咕！🥳";
+        else msg += "Menu updated!🥳";
       }
     }
     else {
-      msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/add[@random_eat_bot] <eatable1> [<eatable2>...]";
+      if (lang == 'Zh') msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/add[@random_eat_bot] <eatable1> [<eatable2>...]";
+      else msg = "What do you want to recommend?\n\nI can only understand messages in this format: /add[@random_eat_bot] <eatable1> [<eatable2>...]";
     }
   }
   else if (text.indexOf('/delete') === 0) {
@@ -220,34 +288,24 @@ function TextProcess(file, text, mensaje) {
           cnt += 1;
         }
         else {
-          msg += paras[i] + " 不在菜单中哦~🤪\n"
+          if (lang == 'Zh') msg += paras[i] + " 不在菜单中哦~🤪\n"
+          else msg += paras[i] + " is not on the menu~🤪\n"
         }
       }
       if (cnt > 0) {
-        msg += "删除成功！不能吃的东西减少了~🥳";
+        if (lang == 'Zh') msg += "删除成功！不能吃的东西减少了~🥳";
+        else msg += "Delete success!"
       }
     }
     else {
-      msg = "什么都没删掉( ´ΦДΦ｀)！\n\n我能看懂的删除方法 ΦωΦ：/delete[@random_eat_bot] <uneatable1> [<uneatable2>...]";
+      if (lang == 'Zh') msg = "什么都没删掉( ´ΦДΦ｀)！\n\n我能看懂的删除方法 ΦωΦ：/delete[@random_eat_bot] <uneatable1> [<uneatable2>...]";
+      else msg = "Delete failed( ´ΦДΦ｀)!\n\nI can only understand messages in this format: /delete[@random_eat_bot] <uneatable1> [<uneatable2>...]";
     }
   }
   else if (text.indexOf('/settings') === 0) {
-    var daliy = settings.getRange('A2').getValue();
-    var key = "";
-    if (daliy == 1) key = "关闭";
-    else key = "开启";
-    var inlineKeyboardMarkup = {
-      "inline_keyboard": [
-        [
-          {
-            text: key + "每日推荐",
-            callback_data: "daliy"
-          }
-        ]
-      ]
-    };
-    msg = "设置本群的 Chickeat 🐣";
-    mensaje.reply_markup = JSON.stringify(inlineKeyboardMarkup);
+    if (lang == 'Zh') msg = "设置当前会话的 Chickeat 🐣";
+    else msg = "Customize Chickeat in this chat 🐣";
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings));
   }
   else{
       msg = text;
