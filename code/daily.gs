@@ -6,6 +6,7 @@ function breakfast() {
     var file = SpreadsheetApp.openById(fl[i]);
     var settings = file.getSheetByName('settings');
     if (settings.getRange(daliy_pos).getValue().toString() == '0') continue;
+    var lang = settings.getRange(lang_pos).getValue();
     var chat_id = settings.getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
@@ -34,6 +35,7 @@ function lunch() {
     var file = SpreadsheetApp.openById(fl[i]);
     var settings = file.getSheetByName('settings');
     if (settings.getRange(daliy_pos).getValue().toString() == '0') continue;
+    var lang = settings.getRange(lang_pos).getValue();
     var chat_id = settings.getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
@@ -62,6 +64,7 @@ function dinner() {
     var file = SpreadsheetApp.openById(fl[i]);
     var settings = file.getSheetByName('settings');
     if (settings.getRange(daliy_pos).getValue().toString() == '0') continue;
+    var lang = settings.getRange(lang_pos).getValue();
     var chat_id = settings.getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
