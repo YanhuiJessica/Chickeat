@@ -302,7 +302,7 @@ function TextProcess(file, text, mensaje) {
       }
     }
     else {
-      if (lang == 'Zh') msg = "什么都没删掉( ´ΦДΦ｀)！\n\n我能看懂的删除方法 ΦωΦ：/delete[@random_eat_bot] <uneatable1> [<uneatable2>...]";
+      if (lang == 'Zh') msg = "什么都没删掉( ´ΦДΦ｀)！\n\n我能看懂的删除方法 ΦωΦ：/delete[@random_eat_bot] <不能吃的1> [<不能吃的2>...]";
       else msg = "Delete failed( ´ΦДΦ｀)!\n\nI can only understand messages in this format: /delete[@random_eat_bot] <uneatable1> [<uneatable2>...]";
     }
   }
