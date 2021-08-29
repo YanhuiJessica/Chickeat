@@ -258,12 +258,16 @@ function TextProcess(file, text, mensaje) {
     {
       var cnt = 0;
       for (var i = 1; i < paras.length; i++) {
-        if (menu_sheet.createTextFinder(paras[i]).findNext()) {
-          if (lang == 'Zh') msg += paras[i] + " 已经在菜单中啦~🐣\n"
-          else msg += paras[i] + " is already on the menu~🐣\n"
+        eobj = paras[i].split(',');
+        var cur = menu_sheet.createTextFinder(eobj[0]).findNext();
+        if (cur) {
+          menu_sheet.deleteRow(cur.getRow());
+          menu_sheet.appendRow(eobj);
+          if (lang == 'Zh') msg += eobj[0] + " 已更新~🐣\n"
+          else msg += eobj[0] + " updated~🐣\n"
         }
         else {
-          menu_sheet.appendRow([paras[i]]);
+          menu_sheet.appendRow(eobj);
           cnt += 1;
         }
       }
@@ -273,8 +277,8 @@ function TextProcess(file, text, mensaje) {
       }
     }
     else {
-      if (lang == 'Zh') msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/add[@random_eat_bot] <eatable1> [<eatable2>...]";
-      else msg = "What do you want to recommend?\n\nI can only understand messages in this format: /add[@random_eat_bot] <eatable1> [<eatable2>...]";
+      if (lang == 'Zh') msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/add[@random_eat_bot] <吃的1[,类型1]> [<吃的2[,类型2]>...]";
+      else msg = "What do you want to recommend?\n\nI can only understand messages in this format: /add[@random_eat_bot] <eatable1[,type1]> [<eatable2[,type2]>...]";
     }
   }
   else if (text.indexOf('/delete') === 0) {
