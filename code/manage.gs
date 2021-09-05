@@ -171,33 +171,63 @@ function TextProcess(file, text, mensaje) {
   var paras = text.trim().split(' ');
   var msg = "";
   if (text.indexOf('/random') === 0) {
-    if (paras[1])
+    var cnt = 1;
+    var type = [];
+    if (paras.length > 1)
     {
-      if (paras[1] > len) {
-        if (lang == 'Zh') msg = "想什么啦！😡菜单里根本没那么多菜！"
-        else msg = "There aren't so many dishes on the menu! :(";
-      }
-      else if (paras[1] == 1)
+      if (paras.length == 3)
       {
-        var random = randomInteger(1, len);
-        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？";
-        else msg = "How about " + menu_sheet.getRange(random, 1).getValue() + " ?";
-      }
-      else if (paras[1] <= 15) {
-        var chosen = getUniqueRandoms(1, len, paras[1]);
-        if (lang == 'Zh') var msg = "看看这些怎么样🐥：\n";
-        else var msg = "How about these🐥: \n";
-        for (var j = 0; j < chosen.length; j++) chosen[j] = 'A' + chosen[j];
-        var ranges = menu_sheet.getRangeList(chosen).getRanges();
-        for (var j = 0; j < chosen.length; j++) msg += ranges[j].getValue() + '\n';
+        if (paras[1][0] == '?') {
+          type = paras[1].slice(1).split(',');
+          cnt = paras[2];
+        }
+        else {
+          cnt = paras[1];
+          type = paras[2].slice(1).split(',');
+        }
       }
       else {
-        var chosen = getUniqueRandoms(1, len, 15);
+        if (paras[1][0] == '?') {
+          type = paras[1].slice(1).split(',');
+        }
+        else cnt = paras[1];
+      }
+      var food_list = [];
+      if (type.length) {
+        for (var i = 0; i < type.length; i++)
+        {
+          var res = menu_sheet.createTextFinder(type[i]).findAll();
+          for (var j = 0; j < res.length; j++) {
+            var food = menu_sheet.getRange(res[j].getRow(), 1).getValue();
+            if (!food_list.includes(food)) food_list.push(food);
+          }
+        }
+      }
+      else {
+        food_list = menu_sheet.getRange(1, 1, len).getValues();
+      }
+      var cur_len = food_list.length;
+      if (cnt > cur_len) {
+        if (lang == 'Zh') msg = "想什么啦！根本没那么多这些种类的菜！"
+        else msg = "There aren't so many dishes with this type on the menu! :(";
+      }
+      else if (cnt == 1)
+      {
+        var random = randomInteger(0, cur_len - 1);
+        if (lang == 'Zh') msg = "尝尝 " + food_list[random] + " 怎么样？";
+        else msg = "How about " + food_list[random] + " ?";
+      }
+      else if (paras[1] <= 15) {
+        var chosen = getUniqueRandoms(0, cur_len - 1, cnt);
         if (lang == 'Zh') var msg = "看看这些怎么样🐥：\n";
         else var msg = "How about these🐥: \n";
-        for (var j = 0; j < chosen.length; j++) chosen[j] = 'A' + chosen[j];
-        var ranges = menu_sheet.getRangeList(chosen).getRanges();
-        for (var j = 0; j < chosen.length; j++) msg += ranges[j].getValue() + '\n';
+        for (var j = 0; j < chosen.length; j++) msg += food_list[chosen[j]] + '\n';
+      }
+      else {
+        var chosen = getUniqueRandoms(0, cur_len - 1, 15);
+        if (lang == 'Zh') var msg = "看看这些怎么样🐥：\n";
+        else var msg = "How about these🐥: \n";
+        for (var j = 0; j < chosen.length; j++) msg += food_list[chosen[j]] + '\n';
         if (lang == 'Zh') msg += "......\n你真的吃得完这么多么？👀"
         else msg += "......\nI don't believe you can eat all of these.👀"
       }
@@ -210,8 +240,8 @@ function TextProcess(file, text, mensaje) {
       else
       {
         var random = randomInteger(1, len);
-        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次随机多个菜品嗷 => /random[@random_eat_bot] [number=1]";
-        else msg = "How about " + menu_sheet.getRange(random, 1).getValue() + " ?\n\nYou can also random two or more dishes at one time => /random[@random_eat_bot] [number=1]";
+        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次指定种类随机多个菜品嗷 => /random[@random_eat_bot] [随机数量，默认为1] [?类型1[,类型2...]，默认随机全部]";
+        else msg = "How about " + menu_sheet.getRange(random, 1).getValue() + " ?\n\nYou can also random two or more specified dishes at one time => /random[@random_eat_bot] [number=1] [?type1[,type2]...]";
       }
     }
   }
