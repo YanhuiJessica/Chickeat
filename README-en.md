@@ -12,10 +12,11 @@ This bot will help you decide what to eat for your everyday meal. \\(ΦωΦ)/ Yo
 
 Supported commands:
 
-- [/add](#) `<eatable1> [<eatable2>...]` - add item(s) to your menu
+- [/update](#) `<eatable1[,type1[,type2...]]> [<eatable2[,type3[,type4...]]>...]` - add item(s) to your menu or update existing items
 - [/delete](#) `<uneatable1> [<uneatable2>...]` - delete item(s) from the menu
 - [/list](#) - list current menu
-- [/random](#) `[integer=1]` - random dish(es) from the menu
+- [/query](#) `<eatable1> [<eatable2>...]` - search for specified item(s)
+- [/random](#) `[integer=1] [?<type1>[,type2...]]` - random dish(es) from the menu
 - [/settings](#) - customize your bot
 
 ## Reference
