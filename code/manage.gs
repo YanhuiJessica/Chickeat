@@ -240,7 +240,7 @@ function TextProcess(file, text, mensaje) {
       else
       {
         var random = randomInteger(1, len);
-        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次指定种类随机多个菜品嗷 => /random[@random_eat_bot] [随机数量，默认为1] [?类型1[,类型2...]，默认随机全部]";
+        if (lang == 'Zh') msg = "尝尝 " + menu_sheet.getRange(random, 1).getValue() + " 怎么样？\n\n还可以一次指定种类随机多个菜品嗷 => /random[@random_eat_bot] [随机数量，默认为1] [?<类型1[,类型2...]>，默认随机全部]";
         else msg = "How about " + menu_sheet.getRange(random, 1).getValue() + " ?\n\nYou can also random two or more specified dishes at one time => /random[@random_eat_bot] [number=1] [?type1[,type2]...]";
       }
     }
