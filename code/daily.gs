@@ -11,7 +11,8 @@ function breakfast() {
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
     var cnt = 3;
-    if (len < 3) cnt = len;
+    if (len == 0) continue;
+    else if (len < 3) cnt = len;
     var chosen = getUniqueRandoms(1, len, cnt);
     if (lang == 'Zh') var msg = "早上好！今日早餐推荐菜是：\n";
     else var msg = "Good morning! Breakfast recommendation:\n"
@@ -40,7 +41,8 @@ function lunch() {
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
     var cnt = 3;
-    if (len < 3) cnt = len;
+    if (len == 0) continue;
+    else if (len < 3) cnt = len;
     var chosen = getUniqueRandoms(1, len, cnt);
     if (lang == 'Zh') var msg = "中午好！今日午餐推荐菜是：\n";
     else var msg = "Good afternoon! Lunch recommendation:\n"
@@ -69,7 +71,8 @@ function dinner() {
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
     var cnt = 3;
-    if (len < 3) cnt = len;
+    if (len == 0) continue;
+    else if (len < 3) cnt = len;
     var chosen = getUniqueRandoms(1, len, cnt);
     if (lang == 'Zh') var msg = "晚上好！今日晚餐推荐菜是：\n";
     else var msg = "Good evening! Dinner recommendation:\n";
