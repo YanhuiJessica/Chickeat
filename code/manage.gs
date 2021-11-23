@@ -93,6 +93,24 @@ function splitFileContent(menu_string) {
   return [chat_id, menu, menu.length];
 }
 
+function getPageKeyboardMarkup(page, len) {
+  page = parseInt(page);
+  if (page > 1) var prev = page - 1;
+  else var prev = page;
+  if (page * 10 < len) var nxt = page + 1;
+  else var nxt = page;
+  var pk = {
+    "inline_keyboard": [
+      [
+        {text: "<<", callback_data: "page " + prev.toString()},
+        {text: page.toString(), callback_data: "page " + page.toString()},
+        {text: ">>", callback_data: "page " + nxt.toString()}
+      ]
+    ]
+  };
+  return pk;
+}
+
 function getInlineKeyboardMarkup(settings) {
   var daliy = settings.getRange(daliy_pos).getValue();
   var lang = settings.getRange(lang_pos).getValue();
@@ -159,6 +177,20 @@ function CallbackProcess(file, data, mensaje) {
   }
   else if (data.indexOf("/settings") === 0) {
     mensaje = TextProcess(file, data, mensaje);
+  }
+  else if (data.indexOf("page") === 0) {
+    var page = data.trim().split(' ')[1];
+    var menu_sheet = file.getSheetByName('menu');
+    var len = menu_sheet.getLastRow();
+    var get_len = 10;
+    var msg = '';
+    if (page * 10 > len) get_len = len - (page - 1) * 10;
+    var menu = menu_sheet.getRange((page - 1) * 10 + 1, 1, get_len).getValues();
+    for (var i = 0; i < get_len; i++) {
+      msg += menu[i][0] + '\n';
+    }
+    mensaje.text = msg;
+    mensaje.reply_markup = JSON.stringify(getPageKeyboardMarkup(page, len));
   }
   return mensaje;
 }
@@ -274,13 +306,13 @@ function TextProcess(file, text, mensaje) {
       }
     }
     else {
-      var menu = menu_sheet.getRange(1, 1, len).getValues();
+      var menu = menu_sheet.getRange(1, 1, 10).getValues();
       if (lang == 'Zh') msg = "还有好多吃的呢~！\\(ΦωΦ ≡ ΦωΦ)/ 你看你看：\n";
       else msg = "There are so many dishes!\\(ΦωΦ ≡ ΦωΦ)/ Have a look:\n";
       for (var i = 0; i < 10; i++) {
         msg += menu[i][0] + '\n';
       }
-      msg += '...';
+      mensaje.reply_markup = JSON.stringify(getPageKeyboardMarkup(1, len));
     }
   }
   else if (text.indexOf('/query') === 0) {
