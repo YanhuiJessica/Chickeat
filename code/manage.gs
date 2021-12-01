@@ -200,7 +200,7 @@ function TextProcess(file, text, mensaje) {
   var settings = file.getSheetByName('settings');
   var lang = settings.getRange(lang_pos).getValue();
   var len = menu_sheet.getLastRow();
-  var paras = text.trim().split(' ');
+  var paras = text.trim().split('/\s+/');
   var msg = "";
   if (text.indexOf('/random') === 0) {
     var cnt = 1;
