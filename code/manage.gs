@@ -103,7 +103,7 @@ function getPageKeyboardMarkup(page, len) {
     "inline_keyboard": [
       [
         {text: "<<", callback_data: "page " + prev.toString()},
-        {text: page.toString(), callback_data: "page " + page.toString()},
+        {text: page.toString() + ' / ' + Math.ceil(len / 10).toString(), callback_data: "page " + page.toString()},
         {text: ">>", callback_data: "page " + nxt.toString()}
       ]
     ]
@@ -200,7 +200,7 @@ function TextProcess(file, text, mensaje) {
   var settings = file.getSheetByName('settings');
   var lang = settings.getRange(lang_pos).getValue();
   var len = menu_sheet.getLastRow();
-  var paras = text.trim().split('/\s+/');
+  var paras = text.trim().split(/\s+/);
   var msg = "";
   if (text.indexOf('/random') === 0) {
     var cnt = 1;
@@ -359,8 +359,8 @@ function TextProcess(file, text, mensaje) {
       }
     }
     else {
-      if (lang == 'Zh') msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/update[@random_eat_bot] <吃的1[,类型1[,类型2...]]> [<吃的2[,类型3[,类型4...]]>...]";
-      else msg = "What do you want to recommend?\n\nI can only understand messages in this format: /update[@random_eat_bot] <eatable1[,type1[,type2...]]> [<eatable2[,type3[,type4...]]>...]";
+      if (lang == 'Zh') msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/update[@random_eat_bot] <吃的1[,类型1[,类型2...]]> [<吃的2[,类型3[,类型4...]]>...]\n\n🌰：/update 香蕉,水果 烤鸡";
+      else msg = "What do you want to recommend?\n\nI can only understand messages in this format: /update[@random_eat_bot] <eatable1[,type1[,type2...]]> [<eatable2[,type3[,type4...]]>...]\n\ne.g. /update banana,fruit roast-chicken";
     }
   }
   else if (text.indexOf('/delete') === 0) {
