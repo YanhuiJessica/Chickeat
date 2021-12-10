@@ -95,15 +95,16 @@ function splitFileContent(menu_string) {
 
 function getPageKeyboardMarkup(page, len) {
   page = parseInt(page);
+  var total = Math.ceil(len / 10);
   if (page > 1) var prev = page - 1;
-  else var prev = page;
+  else var prev = total;
   if (page * 10 < len) var nxt = page + 1;
-  else var nxt = page;
+  else var nxt = 1;
   var pk = {
     "inline_keyboard": [
       [
         {text: "<<", callback_data: "page " + prev.toString()},
-        {text: page.toString() + ' / ' + Math.ceil(len / 10).toString(), callback_data: "page " + page.toString()},
+        {text: page.toString() + ' / ' + total.toString(), callback_data: "page " + page.toString()},
         {text: ">>", callback_data: "page " + nxt.toString()}
       ]
     ]
