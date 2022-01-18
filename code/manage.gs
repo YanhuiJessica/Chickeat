@@ -225,15 +225,18 @@ function TextProcess(file, text, mensaje) {
         }
         else cnt = paras[1];
       }
-      var food_list = [];
+      var food_list = [], rows = [];
       if (type.length) {
         for (var i = 0; i < type.length; i++)
         {
           var res = menu_sheet.createTextFinder(type[i]).findAll();
           for (var j = 0; j < res.length; j++) {
-            var food = menu_sheet.getRange(res[j].getRow(), 1).getValue();
-            if (!food_list.includes(food)) food_list.push(food);
+            rows.push(res[j].getRow());
           }
+        }
+        rows = [...new Set(rows)].sort();
+        for (var i = 0; i < rows.length; i ++) {
+          food_list.push(menu_sheet.getRange(rows[i], 1).getValue());
         }
       }
       else {
