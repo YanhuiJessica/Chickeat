@@ -253,7 +253,7 @@ function TextProcess(file, text, mensaje) {
         if (lang == 'Zh') msg = "尝尝 " + food_list[random] + " 怎么样？";
         else msg = "How about " + food_list[random] + " ?";
       }
-      else if (paras[1] <= 15) {
+      else if (cnt <= 15) {
         var chosen = getUniqueRandoms(0, cur_len - 1, cnt);
         if (lang == 'Zh') var msg = "看看这些怎么样🐥：\n";
         else var msg = "How about these🐥: \n";
