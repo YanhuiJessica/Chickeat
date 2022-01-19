@@ -122,7 +122,7 @@ function getInlineKeyboardMarkup(settings) {
     else key = 'Open everyday recommendation';
   }
   if (lang == 'Zh') lang = 'En';
-  else lang = 'Zh';
+  else lang = '简体中文';
   return {
     "inline_keyboard": [
       [
@@ -330,7 +330,7 @@ function TextProcess(file, text, mensaje) {
         }
         else {
           if (lang == 'Zh') msg += "未查询到 " + paras[i] + " 🤧\n";
-          else msg += paras[i] + "not found 🤧\n";
+          else msg += paras[i] + " not found 🤧\n";
         }
       }
     }
