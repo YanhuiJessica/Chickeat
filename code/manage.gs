@@ -93,62 +93,15 @@ function splitFileContent(menu_string) {
   return [chat_id, menu, menu.length];
 }
 
-function getPageKeyboardMarkup(page, len) {
-  page = parseInt(page);
-  var total = Math.ceil(len / 10);
-  if (page > 1) var prev = page - 1;
-  else var prev = total;
-  if (page * 10 < len) var nxt = page + 1;
-  else var nxt = 1;
-  var pk = {
-    "inline_keyboard": [
-      [
-        {text: "<<", callback_data: "page " + prev.toString()},
-        {text: page.toString() + ' / ' + total.toString(), callback_data: "page " + page.toString()},
-        {text: ">>", callback_data: "page " + nxt.toString()}
-      ]
-    ]
-  };
-  return pk;
-}
-
-function getInlineKeyboardMarkup(settings) {
-  var daliy = settings.getRange(daliy_pos).getValue();
-  var lang = settings.getRange(lang_pos).getValue();
-  if (lang == 'Zh') var key = "关闭每日推荐";
-  else var key = 'Close everyday recommendation'
-  if (daliy.toString() == '0') {
-    if (lang == 'Zh') key = "开启每日推荐";
-    else key = 'Open everyday recommendation';
-  }
-  if (lang == 'Zh') lang = 'En';
-  else lang = '简体中文';
-  return {
-    "inline_keyboard": [
-      [
-        {
-          text: key,
-          callback_data: "daliy"
-        }      
-      ],
-      [
-        {
-          text: lang,
-          callback_data: "language"
-        }
-      ]
-    ]
-  };
-}
-
 function CallbackProcess(file, data, mensaje) {
   var settings = file.getSheetByName('settings');
+  var lang = settings.getRange(lang_pos).getValue();
   if (data.indexOf("daliy") === 0) {
     var cell = settings.getRange(daliy_pos);
     var stext = "<< 返回设置";
     if (cell.getValue().toString() != '0') {
       cell.setValue(0);
-      if (settings.getRange(lang_pos).getValue() == 'Zh') mensaje.text = "每日推荐已关闭🥚";
+      if (lang == 'Zh') mensaje.text = "每日推荐已关闭🥚";
       else {
         mensaje.text = "Everyday recommendation is closed🥚";
         stext = "<< Back to settings";
@@ -156,7 +109,7 @@ function CallbackProcess(file, data, mensaje) {
     }
     else {
       cell.setValue(1);
-      if (settings.getRange(lang_pos).getValue() == 'Zh') mensaje.text = "每日推荐开启成功🐣";
+      if (lang == 'Zh') mensaje.text = "每日推荐开启成功🐣";
       else {
         mensaje.text = "Everyday recommendation is opened🐣";
         stext = "<< Back to settings";
@@ -174,7 +127,7 @@ function CallbackProcess(file, data, mensaje) {
       cell.setValue('Zh');
       mensaje.text = "设置当前会话的 Chickeat 🐣";
     }
-    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings));
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'default'));
   }
   else if (data.indexOf("/settings") === 0) {
     mensaje = TextProcess(file, data, mensaje);
@@ -192,6 +145,38 @@ function CallbackProcess(file, data, mensaje) {
     }
     mensaje.text = msg;
     mensaje.reply_markup = JSON.stringify(getPageKeyboardMarkup(page, len));
+  }
+  else if (data.indexOf("custom_daliy") === 0) {
+    if (lang == 'Zh') {
+      mensaje.text = "需要设置哪一餐呢？ 🥣";
+    }
+    else {
+      mensaje.text = "Which meal do you want to set? 🍽";
+    }
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'meal'));
+  }
+  else if (data.indexOf("breakfast") === 0 || data.indexOf("lunch") === 0 || data.indexOf("dinner") === 0) {
+    if (lang == 'Zh') {
+      mensaje.text = "需要设置随机菜品的种类还是数量呢？ 👀"
+    }
+    else {
+      mensaje.text = "Choose to set random type(s) or the total number of dishes."
+    }
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, data));
+  }
+  else if (data.indexOf("type") === 0) {
+
+  }
+  else if (data.indexOf("number") === 0) {
+    var meal = data.trim().split(' ')[1];
+    if (lang == 'Zh') {
+      var md = {'breakfast': '早餐', 'lunch': '午餐', 'dinner': '晚餐'};
+      mensaje.text = "设置" + md[meal] + "随机菜品的数量 🎲";
+    }
+    else {
+      mensaje.text = "Set the total number of dishes to random for " + meal + " 🎲";
+    }
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, data));
   }
   return mensaje;
 }
@@ -395,7 +380,7 @@ function TextProcess(file, text, mensaje) {
   else if (text.indexOf('/settings') === 0) {
     if (lang == 'Zh') msg = "设置当前会话的 Chickeat 🐣";
     else msg = "Customize Chickeat in this chat 🐣";
-    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings));
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'default'));
   }
   else{
       msg = text;
