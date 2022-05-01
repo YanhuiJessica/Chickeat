@@ -72,6 +72,20 @@ function getInlineKeyboardMarkup(settings, type) {
       "inline_keyboard": [keys.slice(0, 5), keys.slice(5, 10)]
     }
   }
+  else if (type.indexOf('back') === 0) {
+    var key = '<< Back to settings';
+    if (lang == 'Zh') key = '<< 返回设置';
+    return {
+      "inline_keyboard": [
+        [
+          {
+            text: key,
+            callback_data: '/settings'
+          }
+        ]
+      ]
+    }
+  }
   else {
     if (lang == 'Zh') {
       var key = "关闭每日推荐";

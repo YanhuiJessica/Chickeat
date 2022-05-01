@@ -1,45 +1,3 @@
-function randomInteger(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getUniqueRandoms(min, max, cnt) {
-  var res = [];
-  if (max - min + 1 == cnt) {
-    for (var i = min; i <= max; i++) res.push(i);
-  }
-  else if ((max - min + 1)/2 >= cnt) {
-    while(res.length < cnt) {
-      var random = randomInteger(min, max);
-      if (!res.includes(random)) res.push(random);
-    }
-  }
-  else {
-    var tmp = [];
-    while(tmp.length < max - min + 1 - cnt) {
-      var random = randomInteger(min, max);
-      if (!tmp.includes(random)) tmp.push(random);
-    }
-    for (var i = min; i <= max; i++)
-      if (!tmp.includes(i)) res.push(i);
-  }
-  return res;
-}
-
-function GetMD5Hash(input) {
-  var rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, input);
-  var txtHash = '';
-
-  for (j = 0; j <rawHash.length; j++) {
-    var hashVal = rawHash[j];
-    if (hashVal < 0)
-      hashVal += 256; 
-    if (hashVal.toString(16).length == 1)
-      txtHash += "0";
-    txtHash += hashVal.toString(16);
-  }
-  return txtHash;
-}
-
 function getFolder(){
   return DriveApp.getFolderById('1AVWGzwEFJTkup13-Dr9fBSdsgwdXH3q2');
 }
@@ -59,16 +17,6 @@ function getName(user) {
     name += " " + user.last_name;
   }
   return name;
-}
-
-function escapeMarkDown(toEscapeMsg) {
-  var escapedMsg = toEscapeMsg
-  .replace(/_/g, "\\_")
-  .replace(/\*/g, "\\*")
-  .replace(/\[/g, "\\[")
-  .replace(/`/g, "\\`");
-  
-  return escapedMsg;
 }
 
 function getMarkDownUserUrl(userName, userId) {
@@ -98,13 +46,11 @@ function CallbackProcess(file, data, mensaje) {
   var lang = settings.getRange(lang_pos).getValue();
   if (data.indexOf("daliy") === 0) {
     var cell = settings.getRange(daliy_pos);
-    var stext = "<< 返回设置";
     if (cell.getValue().toString() != '0') {
       cell.setValue(0);
       if (lang == 'Zh') mensaje.text = "每日推荐已关闭🥚";
       else {
         mensaje.text = "Everyday recommendation is closed🥚";
-        stext = "<< Back to settings";
       }
     }
     else {
@@ -112,10 +58,9 @@ function CallbackProcess(file, data, mensaje) {
       if (lang == 'Zh') mensaje.text = "每日推荐开启成功🐣";
       else {
         mensaje.text = "Everyday recommendation is opened🐣";
-        stext = "<< Back to settings";
       }
     }
-    mensaje.reply_markup = JSON.stringify({"inline_keyboard": [[{text: stext, callback_data: "/settings"}]]});
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'back'));
   }
   else if (data.indexOf("language") === 0) {
     var cell = settings.getRange(lang_pos);
@@ -168,15 +113,28 @@ function CallbackProcess(file, data, mensaje) {
 
   }
   else if (data.indexOf("number") === 0) {
-    var meal = data.trim().split(' ')[1];
-    if (lang == 'Zh') {
-      var md = {'breakfast': '早餐', 'lunch': '午餐', 'dinner': '晚餐'};
-      mensaje.text = "设置" + md[meal] + "随机菜品的数量 🎲";
+    var meal = data.trim().split(' ');
+    var md = {'breakfast': '早餐', 'lunch': '午餐', 'dinner': '晚餐'};
+    if (meal.length == 2) {
+      if (lang == 'Zh') {
+        mensaje.text = "设置" + md[meal[1]] + "随机菜品的数量 🎲";
+      }
+      else {
+        mensaje.text = "Set the total number of dishes to random for " + meal + " 🎲";
+      }
+      mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, data));
     }
     else {
-      mensaje.text = "Set the total number of dishes to random for " + meal + " 🎲";
+      var cell = settings.getRange(eval(meal[1] + '_num_pos'));
+      cell.setValue(meal[2]);
+      if (lang == 'Zh') {
+        mensaje.text = md[meal[1]] + "随机菜品数量已设置为 " + meal[2] + " 🎉";
+      }
+      else {
+        mensaje.text = "The total number of dishes to random for " + meal[1] + " is successfully set to " + meal[2] + " 🎉";
+      }
+      mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'back'));
     }
-    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, data));
   }
   return mensaje;
 }
