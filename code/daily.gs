@@ -32,7 +32,9 @@ function breakfast() {
     var chat_id = settings.getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
-    var cnt = 3;
+    var cnt = settings.getRange(breakfast_num_pos).getValue();
+    if (cnt) cnt = parseInt(cnt);
+    else cnt = 3;
     if (len == 0) continue;
     else if (len < 3) cnt = len;
     var chosen = getUniqueRandoms(1, len, cnt);
@@ -62,7 +64,9 @@ function lunch() {
     var chat_id = settings.getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
-    var cnt = 3;
+    var cnt = settings.getRange(lunch_num_pos).getValue();
+    if (cnt) cnt = parseInt(cnt);
+    else cnt = 3;
     if (len == 0) continue;
     else if (len < 3) cnt = len;
     var chosen = getUniqueRandoms(1, len, cnt);
@@ -92,7 +96,9 @@ function dinner() {
     var chat_id = settings.getRange(1, 1).getValue().toString();
     var menu_sheet = file.getSheetByName('menu');
     var len = menu_sheet.getLastRow();
-    var cnt = 3;
+    var cnt = settings.getRange(dinner_num_pos).getValue();
+    if (cnt) cnt = parseInt(cnt);
+    else cnt = 3;
     if (len == 0) continue;
     else if (len < 3) cnt = len;
     var chosen = getUniqueRandoms(1, len, cnt);
