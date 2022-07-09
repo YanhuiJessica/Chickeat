@@ -44,6 +44,8 @@ function splitFileContent(menu_string) {
 function CallbackProcess(file, data, mensaje) {
   var settings = file.getSheetByName('settings');
   var lang = settings.getRange(lang_pos).getValue();
+  var menu_sheet = file.getSheetByName('menu');
+  var len = menu_sheet.getLastRow();
   if (data.indexOf("daliy") === 0) {
     var cell = settings.getRange(daliy_pos);
     if (cell.getValue().toString() != '0') {
@@ -79,8 +81,6 @@ function CallbackProcess(file, data, mensaje) {
   }
   else if (data.indexOf("page") === 0) {
     var page = data.trim().split(' ')[1];
-    var menu_sheet = file.getSheetByName('menu');
-    var len = menu_sheet.getLastRow();
     var get_len = 10;
     var msg = '';
     if (page * 10 > len) get_len = len - (page - 1) * 10;
@@ -110,7 +110,16 @@ function CallbackProcess(file, data, mensaje) {
     mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, data));
   }
   else if (data.indexOf("type") === 0) {
-
+    var types = menu_sheet.getRange(1, 2, len, menu_sheet.getLastColumn() - 1).getValues().flat();
+    types = [...new Set(types)].sort().slice(1);
+    if (lang == 'Zh') {
+      mensaje.text = "可设置种类: ";
+    }
+    else {
+      mensaje.text = "Available types: ";
+    }
+    mensaje.text += types.join(',');
+    mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'back'));
   }
   else if (data.indexOf("number") === 0) {
     var meal = data.trim().split(' ');
