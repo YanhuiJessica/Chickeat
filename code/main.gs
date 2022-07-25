@@ -34,6 +34,7 @@ function identificar(e){
     settings.setName('settings');
     settings.appendRow([chat_id]);
     file.insertSheet('menu');
+    file.insertSheet('types');
   }
   else {
     file = SpreadsheetApp.openById(file.next().getId());

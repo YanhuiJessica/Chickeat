@@ -45,6 +45,7 @@ function CallbackProcess(file, data, mensaje) {
   var settings = file.getSheetByName('settings');
   var lang = settings.getRange(lang_pos).getValue();
   var menu_sheet = file.getSheetByName('menu');
+  var type_sheet = file.getSheetByName('types');
   var len = menu_sheet.getLastRow();
   if (data.indexOf("daliy") === 0) {
     var cell = settings.getRange(daliy_pos);
@@ -110,8 +111,7 @@ function CallbackProcess(file, data, mensaje) {
     mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, data));
   }
   else if (data.indexOf("type") === 0) {
-    var types = menu_sheet.getRange(1, 2, len, menu_sheet.getLastColumn() - 1).getValues().flat();
-    types = [...new Set(types)].sort().slice(1);
+    var types = type_sheet.getRange(1, 1, 1, type_sheet.getLastColumn()).getValues().flat();
     if (lang == 'Zh') {
       mensaje.text = "可设置种类: ";
     }
@@ -150,6 +150,7 @@ function CallbackProcess(file, data, mensaje) {
 
 function TextProcess(file, text, mensaje) {
   var menu_sheet = file.getSheetByName('menu');
+  var type_sheet = file.getSheetByName('types');
   var settings = file.getSheetByName('settings');
   var lang = settings.getRange(lang_pos).getValue();
   var len = menu_sheet.getLastRow();
@@ -313,6 +314,17 @@ function TextProcess(file, text, mensaje) {
         if (lang == 'Zh') msg += "添加成功！菜单已更新咕！🥳";
         else msg += "Menu updated!🥳";
       }
+      var types = menu_sheet.getRange(1, 2, len, menu_sheet.getLastColumn() - 1).getValues().flat();
+      types = [...new Set(types)].sort().slice(1);
+      if (type_sheet) {
+        type_sheet.deleteRow(1);
+        type_sheet.appendRow(types);
+      }
+      else {
+        file.insertSheet('types');
+        type_sheet = file.getSheetByName('types');
+        type_sheet.appendRow(types);
+      }
     }
     else {
       if (lang == 'Zh') msg = "咕？所以要提议吃啥呀？🤨\n\n我能看懂的提议格式 ΦωΦ：/update[@random_eat_bot] <吃的1[,类型1[,类型2...]]> [<吃的2[,类型3[,类型4...]]>...]\n\n🌰：/update 香蕉,水果 烤鸡";
@@ -337,6 +349,17 @@ function TextProcess(file, text, mensaje) {
       if (cnt > 0) {
         if (lang == 'Zh') msg += "删除成功！不能吃的东西减少了~🥳";
         else msg += "Delete success!"
+      }
+      var types = menu_sheet.getRange(1, 2, len, menu_sheet.getLastColumn() - 1).getValues().flat();
+      types = [...new Set(types)].sort().slice(1);
+      if (type_sheet) {
+        type_sheet.deleteRow(1);
+        type_sheet.appendRow(types);
+      }
+      else {
+        file.insertSheet('types');
+        type_sheet = file.getSheetByName('types');
+        type_sheet.appendRow(types);
       }
     }
     else {
