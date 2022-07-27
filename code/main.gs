@@ -41,7 +41,16 @@ function identificar(e){
     var settings = file.getSheets()[0];
   }
   if (e.message) {
-    if (e.message.text){
+    if (e.message.reply_to_message) {
+      var mensaje = {
+        "method": "sendMessage",
+        "chat_id": chat_id,
+        "text": e.message.reply_to_message.text,
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": true,
+      }
+    }
+    else if (e.message.text){
       var mensaje = {
         "method": "sendMessage",
         "chat_id": chat_id
