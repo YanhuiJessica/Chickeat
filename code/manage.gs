@@ -112,13 +112,32 @@ function CallbackProcess(file, data, mensaje) {
   }
   else if (data.indexOf("type") === 0) {
     var types = type_sheet.getRange(1, 1, 1, type_sheet.getLastColumn()).getValues().flat();
-    if (lang == 'Zh') {
-      mensaje.text = "可设置种类: ";
+    var meal = data.trim().split(' ');
+    var md = {'breakfast': '早餐', 'lunch': '午餐', 'dinner': '晚餐'};
+    if (types.length == 0) {
+      if (lang == 'Zh') {
+        mensaje.text = "没有可设置的菜品种类 😢";
+      }
+      else {
+        mensaje.text = "No available types to set 😢";
+      }
     }
     else {
-      mensaje.text = "Available types: ";
+      if (lang == 'Zh') {
+        mensaje.text = "可设置种类: ";
+      }
+      else {
+        mensaje.text = "Available types: ";
+      }
+      mensaje.text += types.join(',');
+      if (lang == 'Zh') {
+        mensaje.text += "\n请回复本条消息来设置" + md[meal[1]] + "随机菜品的种类\n我能看懂的格式 🐣：<类型1>[,<类型2>[...]]，回复 `all` 来设置随机全部种类\n🌰 水果,饮品";
+      }
+      else {
+        mensaje.text += "\nPlease reply to this message to set the types of dishes to random for " + meal + ".\nI can only understand the message in the following format: <type1>[,<type2>[...]], reply `all` to set random all types.\ne.g. fruit,drinks";
+      }
+      mensaje.parse_mode = 'Markdown';
     }
-    mensaje.text += types.join(',');
     mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'back'));
   }
   else if (data.indexOf("number") === 0) {
