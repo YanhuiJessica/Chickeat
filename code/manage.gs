@@ -167,6 +167,66 @@ function CallbackProcess(file, data, mensaje) {
   return mensaje;
 }
 
+function ReplyProcess(file, text, reply, mensaje) {
+  if (text.indexOf('可设置种类') === 0 || text.indexOf('Available types') === 0) {
+    var settings = file.getSheetByName('settings');
+    var lang = settings.getRange(lang_pos).getValue();
+    var hint = text.split('\n')[1], meal;
+    var md = {'breakfast': '早餐', 'lunch': '午餐', 'dinner': '晚餐'};
+    if (hint.indexOf('早餐') != -1 || hint.indexOf('breakfast') != -1) {
+      meal = 'breakfast';
+    }
+    else if (hint.indexOf('午餐') != -1 || hint.indexOf('lunch') != -1) {
+      meal = 'lunch';
+    }
+    else {
+      meal = 'dinner';
+    }
+    mensaje.reply_to_message_id = reply.message_id;
+    var type_sheet = file.getSheetByName('types');
+    var types = type_sheet.getRange(1, 1, 1, type_sheet.getLastColumn()).getValues().flat();
+    var set_types = reply.text.trim().split(',');
+    var set_all = 0, checked = [], types_op;
+    for (var i = 0; i < set_types.length; i++) {
+      if (set_types[i] == 'all') {
+        set_all = 1;
+        break;
+      }
+      var idx = types.indexOf(set_types[i]);
+      if (idx != -1) {
+        checked.push(set_types[i]);
+      }
+    }
+    if (set_all == 1) {
+      types_op = 'all';
+    }
+    else {
+      types_op = checked.join(',');
+    }
+    switch (meal) {
+      case 'breakfast':
+        settings.getRange(breakfast_type_pos).setValue(types_op);
+        break;
+      case 'lunch':
+        settings.getRange(lunch_type_pos).setValue(types_op);
+        break;
+      case 'dinner':
+        settings.getRange(dinner_type_pos).setValue(types_op);
+        break;
+    }
+    if (lang == 'Zh') {
+      mensaje.text = md[meal] + "随机菜品种类已设置为 " + types_op + " 🎉";
+    }
+    else {
+      mensaje.text = "The types of dishes to random for " + meal + " is successfully set to " + types_op + " 🎉";
+    }
+  }
+  else {
+    mensaje.text = reply.text;
+  }
+  return mensaje;
+}
+
 function TextProcess(file, text, mensaje) {
   var menu_sheet = file.getSheetByName('menu');
   var type_sheet = file.getSheetByName('types');

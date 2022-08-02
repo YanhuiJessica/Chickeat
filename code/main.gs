@@ -42,12 +42,31 @@ function identificar(e){
   }
   if (e.message) {
     if (e.message.reply_to_message) {
-      var mensaje = {
-        "method": "sendMessage",
-        "chat_id": chat_id,
-        "text": e.message.reply_to_message.text,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": true,
+      var reply_to_message = e.message.reply_to_message;
+      if (reply_to_message.text) {
+        var mensaje = {
+          "method": "sendMessage",
+          "chat_id": chat_id,
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true,
+        }
+        mensaje = ReplyProcess(file, reply_to_message.text, e.message, mensaje);
+      }
+      else if (reply_to_message.sticker) {
+        var mensaje = {
+          "method": "sendSticker",
+          "chat_id": chat_id,
+          "sticker": reply_to_message.sticker.file_id
+        }
+      }
+      else if (reply_to_message.photo) {
+        var array = reply_to_message.photo;
+        var text = array[1];
+        var mensaje = {
+          "method": "sendPhoto",
+          "chat_id": chat_id,
+          "photo": text.file_id
+        }
       }
     }
     else if (e.message.text){
