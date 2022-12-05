@@ -1,3 +1,5 @@
+var OPENAI_API_KEY = '';
+
 var daliy_pos = 'A2';
 var lang_pos = 'B2';
 

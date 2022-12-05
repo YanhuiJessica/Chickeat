@@ -41,6 +41,23 @@ function splitFileContent(menu_string) {
   return [chat_id, menu, menu.length];
 }
 
+function Chat(input) {
+  let response = UrlFetchApp.fetch('https://api.openai.com/v1/completions', {
+    'method': 'post',
+    'headers': {
+      'authorization': 'Bearer ' + OPENAI_API_KEY,
+    },
+    'contentType': 'application/json',
+    'payload': JSON.stringify({
+      'model': 'text-davinci-003',
+      'prompt': input,
+      'temperature': 0,
+      'max_tokens': 256
+    })
+  });
+  return JSON.parse(response.getContentText())['choices'][0]['text'];
+}
+
 function CallbackProcess(file, data, mensaje) {
   var settings = file.getSheetByName('settings');
   var lang = settings.getRange(lang_pos).getValue();
@@ -222,7 +239,7 @@ function ReplyProcess(file, text, reply, mensaje) {
     }
   }
   else {
-    mensaje.text = reply.text;
+    mensaje.text = Chat(reply.text);
   }
   return mensaje;
 }
@@ -452,7 +469,7 @@ function TextProcess(file, text, mensaje) {
     mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'default'));
   }
   else{
-      msg = text;
+      msg = Chat(text);
   }
   mensaje.text = msg;
   return mensaje;
