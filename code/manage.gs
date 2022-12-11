@@ -469,6 +469,9 @@ function TextProcess(file, text, mensaje) {
     mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'default'));
   }
   else{
+      if (text.indexOf('/') === 0) {
+        text = text.slice(1);
+      }
       msg = Chat(text);
   }
   mensaje.text = msg;
