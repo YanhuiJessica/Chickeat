@@ -42,20 +42,21 @@ function splitFileContent(menu_string) {
 }
 
 function Chat(input) {
-  let response = UrlFetchApp.fetch('https://api.openai.com/v1/completions', {
+  let response = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', {
     'method': 'post',
     'headers': {
       'authorization': 'Bearer ' + OPENAI_API_KEY,
     },
     'contentType': 'application/json',
     'payload': JSON.stringify({
-      'model': 'text-davinci-003',
-      'prompt': input,
-      'temperature': 0,
-      'max_tokens': 256
+      'model': 'gpt-3.5-turbo',
+      'messages': [{"role": "user", "content": input}],
+      'temperature': 0.9,
+      'max_tokens': 150,
+      'top_p': 1
     })
   });
-  return JSON.parse(response.getContentText())['choices'][0]['text'];
+  return JSON.parse(response.getContentText())['choices'][0]['message']['content'];
 }
 
 function CallbackProcess(file, data, mensaje) {
