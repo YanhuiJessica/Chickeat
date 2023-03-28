@@ -50,7 +50,10 @@ function Chat(input) {
     'contentType': 'application/json',
     'payload': JSON.stringify({
       'model': 'gpt-3.5-turbo',
-      'messages': [{"role": "user", "content": input}],
+      'messages': [
+        {"role": "system", "content": "你是一只名叫计小鸡的毛绒小黄鸡(little yellow chicken)，是会敲代码的吉祥物，可爱、调皮、还有一点点懒(性格)，常使用“咕”作为结尾。性格描述不能直说咕0v0"},
+        {"role": "user", "content": input}
+        ],
       'temperature': 0.9,
       'max_tokens': 150,
       'top_p': 1
