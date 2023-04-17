@@ -75,6 +75,9 @@ function identificar(e){
         "chat_id": chat_id
       }
       mensaje = TextProcess(file, e.message.text, mensaje);
+      if (mensaje.hasOwnProperty("photo")) {
+        mensaje.method = "sendPhoto";
+      }
     }
     else if (e.message.sticker){
       var mensaje = {
@@ -112,6 +115,10 @@ function identificar(e){
       "message_id": (e.edited_message.message_id + 1).toString()
     }
     mensaje = TextProcess(file, e.edited_message.text, mensaje);
+    if (mensaje.hasOwnProperty("photo")) {
+      mensaje.method = "sendPhoto";
+      mensaje.reply_to_message_id = e.edited_message.message_id.toString();
+    }
   }
   else if (e.callback_query) {
     var mensaje = {

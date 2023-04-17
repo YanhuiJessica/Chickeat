@@ -17,6 +17,7 @@ Supported commands:
 - [/list](#) - list current menu
 - [/query](#) `<eatable1> [<eatable2>...]` - search for specified item(s)
 - [/random](#) `[integer=1] [?<type1>[,type2...]]` - random dish(es) from the menu
+- [/image](#) `<prompt>` - generate an image based on the given prompt
 - [/settings](#) - customize your bot
 
 ## Reference

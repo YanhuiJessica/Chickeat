@@ -82,7 +82,7 @@ function Draw(input) {
     'payload': JSON.stringify({
       'prompt': input,
       'n': 1,
-      'size': '512x512',
+      'size': '256x256',
     })
   })
   return JSON.parse(response.getContentText())['data'][0]['url'];
@@ -497,6 +497,16 @@ function TextProcess(file, text, mensaje) {
     if (lang == 'Zh') msg = "设置当前会话的 Chickeat 🐣";
     else msg = "Customize Chickeat in this chat 🐣";
     mensaje.reply_markup = JSON.stringify(getInlineKeyboardMarkup(settings, 'default'));
+  }
+  else if (text.indexOf('/image') === 0) {
+    if (paras[1]) {
+      img = Draw(paras[1]);
+      mensaje.photo = img;
+    }
+    else {
+      if (lang == 'Zh') msg = "咕？> <\n\n需要提供图片描述咕：/image[@random_eat_bot] <描述>";
+      else msg = "What do you want to draw? > <\n\nI need some information: /image[@random_eat_bot] <description>";
+    }
   }
   else{
       if (text.indexOf('/') === 0) {
