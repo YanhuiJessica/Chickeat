@@ -1,4 +1,5 @@
 var OPENAI_API_KEY = '';
+var OPENAI_BASE_URL = 'https://api.openai.com/';
 
 var daliy_pos = 'A2';
 var lang_pos = 'B2';
