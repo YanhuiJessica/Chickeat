@@ -84,7 +84,7 @@ function Draw(input) {
         'model': 'dall-e-3',
         'prompt': input,
         'n': 1,
-        'size': '256x256',
+        'size': '1024x1024',
       })
     })
     return JSON.parse(response.getContentText())['data'][0]['url'];
