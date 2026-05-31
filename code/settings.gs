@@ -11,3 +11,8 @@ var dinner_num_pos = 'C3';
 var breakfast_type_pos = 'A4';
 var lunch_type_pos = 'B4';
 var dinner_type_pos = 'C4';
+
+var IMAGE_QUEUE_KEY = 'CHICKEAT_IMAGE_QUEUE';
+var IMAGE_WORKER_TOKEN = '';
+var IMAGE_WORKER_HOOK_URL = '';
+var IMAGE_WORKER_HOOK_TOKEN = '';

@@ -10,13 +10,48 @@ function send(payload) {
   }
 }
 
+function jsonResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function isWorkerAuthorized(e) {
+  return IMAGE_WORKER_TOKEN && e && e.parameter && e.parameter.token === IMAGE_WORKER_TOKEN;
+}
+
+function handleWorkerRequest(e) {
+  if (!isWorkerAuthorized(e)) {
+    return jsonResponse({
+      'ok': false,
+      'error': 'unauthorized'
+    });
+  }
+
+  if (e.parameter.action === 'processImageQueue') {
+    return jsonResponse({
+      'ok': true,
+      'result': processImageQueue()
+    });
+  }
+
+  return jsonResponse({
+    'ok': false,
+    'error': 'unsupported action'
+  });
+}
+
+function doGet(e) {
+  return handleWorkerRequest(e);
+}
+
 function doPost(e){
   var estringa = JSON.parse(e.postData.contents);
-  var payload = identificar(estringa);
+  var payload = identify(estringa);
   send(payload);
 }
 
-function identificar(e){
+function identify(e){
   var folder = getFolder();
   if (e.message)
     var chat_id = e.message.chat.id.toString();

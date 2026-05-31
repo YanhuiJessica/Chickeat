@@ -64,8 +64,101 @@ function Chat(input) {
   return JSON.parse(response.getContentText())['output'][1]['content'][0]['text'];
 }
 
+function enqueueImageJob(chatId, prompt, lang) {
+  var properties = PropertiesService.getScriptProperties();
+  var queue = JSON.parse(properties.getProperty(IMAGE_QUEUE_KEY) || '[]');
+
+  queue.push({
+    'id': Utilities.getUuid(),
+    'chat_id': chatId,
+    'prompt': prompt,
+    'lang': lang
+  });
+
+  properties.setProperty(IMAGE_QUEUE_KEY, JSON.stringify(queue));
+}
+
+function notifyImageWorker() {
+  if (!IMAGE_WORKER_HOOK_URL) {
+    return "HOOK_URL_NOT_SET";
+  }
+
+  var options = {
+    'method': 'post',
+    'muteHttpExceptions': true,
+    'payload': {
+      'action': 'processImageQueue'
+    }
+  };
+
+  if (IMAGE_WORKER_HOOK_TOKEN) {
+    options.payload.token = IMAGE_WORKER_HOOK_TOKEN;
+  }
+
+  try {
+    UrlFetchApp.fetch(IMAGE_WORKER_HOOK_URL, options);
+  }
+  catch (error) {
+    return error.toString();
+  }
+}
+
+function processImageQueue() {
+  var job = null;
+  var remaining = 0;
+
+  var properties = PropertiesService.getScriptProperties();
+  var queue = JSON.parse(properties.getProperty(IMAGE_QUEUE_KEY) || '[]');
+
+  if (queue.length == 0) {
+    return {
+      'processed': false,
+      'remaining': 0,
+      'message': 'queue is empty'
+    };
+  }
+
+  job = queue.shift();
+  remaining = queue.length;
+
+  if (remaining > 0) {
+    properties.setProperty(IMAGE_QUEUE_KEY, JSON.stringify(queue));
+  }
+  else {
+    properties.deleteProperty(IMAGE_QUEUE_KEY);
+  }
+
+  try {
+    send({
+      'method': 'sendPhoto',
+      'chat_id': job.chat_id,
+      'photo': Draw(job.prompt)
+    });
+
+    return {
+      'processed': true,
+      'remaining': remaining,
+      'job_id': job.id
+    };
+  }
+  catch (error) {
+    send({
+      'method': 'sendMessage',
+      'chat_id': job.chat_id,
+      'text': job.lang == 'Zh' ? '图片生成失败了，请稍后再试咕😢' : 'Image generation failed. Please try again later.'
+    });
+
+    return {
+      'processed': false,
+      'remaining': remaining,
+      'job_id': job.id,
+      'error': error.toString()
+    };
+  }
+}
+
 /**
- * The function uses the OpenAI API DALLE to generate an image based on a given prompt.
+ * The function uses the OpenAI API to generate an image based on a given prompt.
  * 
  * Args:
  *   input: The input is the prompt or text that you want to generate an image for using OpenAI's image
@@ -83,13 +176,18 @@ function Draw(input) {
       },
       'contentType': 'application/json',
       'payload': JSON.stringify({
-        'model': 'dall-e-3',
+        'model': 'gpt-image-2',
         'prompt': input,
         'n': 1,
         'size': '1024x1024',
       })
     })
-    return JSON.parse(response.getContentText())['data'][0]['url'];
+    let imageBase64 = JSON.parse(response.getContentText())['data'][0]['b64_json'];
+    return Utilities.newBlob(
+      Utilities.base64Decode(imageBase64),
+      'image/png',
+      'photo.png'
+    );
   }
   catch (error) {
     console.error('Error in Draw function:', error);
@@ -509,8 +607,16 @@ function TextProcess(file, text, mensaje) {
   }
   else if (text.indexOf('/image') === 0) {
     if (paras[1]) {
-      img = Draw(paras[1]);
-      mensaje.photo = img;
+      enqueueImageJob(mensaje.chat_id, paras[1], lang);
+      let ret = notifyImageWorker();
+      if (ret) {
+        mensaje.parse_mode = 'MarkdownV2';
+        ret = escapeMarkDownV2(ret);
+        if (lang == 'Zh') msg = '请求发送失败，错误信息：\n' + ret + '\n[报告问题](https://github.com/YanhuiJessica/Chickeat/issues)';
+        else msg = escapeMarkDownV2('Failed to send request. Error:') + '\n' + ret + '\n[Report issue](https://github.com/YanhuiJessica/Chickeat/issues)';
+      } else {
+        msg = lang == 'Zh' ? '收到咕，开始生成> <' : 'Queued the image request. I will send it when it is ready.';
+      }
     }
     else {
       if (lang == 'Zh') msg = "咕？> <\n\n需要提供图片描述咕：/image[@random_eat_bot] <描述>";

@@ -1,0 +1,16 @@
+[Unit]
+Description=Chickeat image queue listener trigger
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/path-to-env/chickeat-image-trigger.env
+WorkingDirectory=/path-to-script
+ExecStart=/usr/bin/env bash /path-to-script/run_ncat_image_worker.sh
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
